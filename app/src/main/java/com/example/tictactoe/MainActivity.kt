@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
     private var buttons = Array<Button?>(9) { null }
@@ -54,15 +55,86 @@ class MainActivity : AppCompatActivity() {
                 turn!!.text = getString(R.string.player_x_s_turn)
                 currentPlayerX = true
             }
+
+            // check for winning play or tied board
+            checkWinner()
         }
     }
 
     private fun newGame() {
+        // enable buttons
+        for (button in buttons) {
+            button?.isEnabled = true
+        }
+
+        // reset board
         for (button in buttons) {
             button!!.text = ""
         }
 
+        // set turn
         turn!!.text = "Player X's turn!"
         currentPlayerX = true
+    }
+
+    private fun checkWinner() {
+        // check rows
+        for (i in 0 until 3) {
+            if (buttons[i * 3]!!.text == buttons[i * 3 + 1]!!.text && buttons[i * 3 + 1]!!.text == buttons[i * 3 + 2]!!.text && buttons[i * 3]!!.text.isNotEmpty()) {
+                toastWinner(buttons[i * 3]!!.text.toString())
+                return
+            }
+        }
+
+        // check columns
+        for (i in 0 until 3) {
+            if (buttons[i]!!.text == buttons[i + 3]!!.text && buttons[i + 3]!!.text == buttons[i + 6]!!.text && buttons[i]!!.text.isNotEmpty()) {
+                toastWinner(buttons[i]!!.text.toString())
+                return
+            }
+        }
+
+        // check diagonals
+        if (buttons[0]!!.text == buttons[4]!!.text && buttons[4]!!.text == buttons[8]!!.text && buttons[0]!!.text.isNotEmpty()) {
+            toastWinner(buttons[0]!!.text.toString())
+            return
+        }
+        if (buttons[2]!!.text == buttons[4]!!.text && buttons[4]!!.text == buttons[6]!!.text && buttons[2]!!.text.isNotEmpty()) {
+            toastWinner(buttons[2]!!.text.toString())
+            return
+        }
+
+        // check for tie
+        if (isBoardFull()) {
+            toastWinner("It's a tie!")
+            return
+        }
+    }
+
+    private fun toastWinner(winner: String) {
+       val msg =
+           if (winner == "It's a tie!") {
+                "It's a tie!"
+           }
+           else {
+               "Player $winner wins!"
+           }
+
+        // make the toast
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+
+        // disable buttons (re-enabled when new game is made)
+        for (button in buttons) {
+            button?.isEnabled = false
+        }
+    }
+
+    private fun isBoardFull(): Boolean {
+        for (button in buttons) {
+            if (button!!.text.isEmpty()) {
+                return false
+            }
+        }
+        return true
     }
 }
